@@ -43,7 +43,7 @@ export const ChakraTransitionWrapper: React.FC<ChakraTransitionWrapperProps> = (
   );
 };
 
-// Initial Load Awakening Intro (Pure Naruto Uzumaki Sage Mode)
+// Initial Load Awakening Intro (Instant Non-Blocking Naruto Uzumaki Sage Mode)
 export const SageIntro: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
 
@@ -51,7 +51,7 @@ export const SageIntro: React.FC<{ onComplete?: () => void }> = ({ onComplete })
     const timer = setTimeout(() => {
       setVisible(false);
       if (onComplete) onComplete();
-    }, 1100);
+    }, 450);
 
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -60,19 +60,19 @@ export const SageIntro: React.FC<{ onComplete?: () => void }> = ({ onComplete })
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 1, scale: 1.05 }}
-          animate={{ opacity: 0, scale: 1 }}
+          initial={{ opacity: 0.9 }}
+          animate={{ opacity: 0 }}
           exit={{ opacity: 0, pointerEvents: 'none' }}
-          transition={{ duration: 1.1, ease: 'circOut' }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
           className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-gradient-to-b from-[#7c2d12] via-[#431407] to-[#060403]"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0.95 }}
-            animate={{ scale: 1.25, opacity: 0 }}
-            transition={{ duration: 0.95, ease: 'easeOut' }}
-            className="text-center font-display text-3xl md:text-5xl font-bold tracking-widest text-amber-100 drop-shadow-[0_0_30px_#f97316]"
+            initial={{ scale: 0.95, opacity: 0.9 }}
+            animate={{ scale: 1.1, opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="text-center font-display text-2xl md:text-4xl font-bold tracking-widest text-amber-100 drop-shadow-[0_0_25px_#f97316]"
           >
-            六道仙人 // UZUMAKI SAGE AWAKENING
+            六道仙人 // UZUMAKI SAGE
           </motion.div>
         </motion.div>
       )}

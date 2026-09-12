@@ -124,13 +124,13 @@ export const HeroCardDeck: React.FC<HeroCardDeckProps> = ({
 
       {/* 🌟 FRONT & CENTER MASTERPIECE GLASS CARD (Naruto Uzumaki & Kurama Sage Mode) */}
       <motion.div
-        layout
-        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        initial={{ opacity: 0, scale: 0.98, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-5xl rounded-3xl sm:rounded-[36px] overflow-hidden border border-orange-500/40 border-t-amber-400/70 border-b-black/90 shadow-[0_20px_80px_rgba(0,0,0,0.9),0_0_40px_rgba(234,88,12,0.35)] backdrop-blur-3xl z-20"
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-5xl rounded-3xl sm:rounded-[36px] overflow-hidden border border-orange-500/40 border-t-amber-400/70 border-b-black/90 shadow-[0_20px_80px_rgba(0,0,0,0.9),0_0_40px_rgba(234,88,12,0.35)] backdrop-blur-xl z-20"
         style={{
           background: 'linear-gradient(135deg, rgba(28, 14, 6, 0.92) 0%, rgba(14, 7, 3, 0.95) 50%, rgba(6, 3, 2, 0.98) 100%)',
+          transform: 'translateZ(0)',
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-orange-950/40 via-transparent to-amber-900/20 pointer-events-none" />

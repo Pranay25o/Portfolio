@@ -21,7 +21,11 @@ export const App: React.FC = () => {
 
     const el = document.getElementById(sectionId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const topOffset = el.getBoundingClientRect().top + window.pageYOffset - 75;
+      window.scrollTo({
+        top: topOffset,
+        behavior: 'smooth',
+      });
     }
   };
 
