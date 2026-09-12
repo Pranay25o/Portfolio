@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { motion, useAnimationControls } from 'framer-motion';
-import { useThemeStore } from '../store/useThemeStore';
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
-// Naruto Uzumaki Spiral & 4-Blade Rasenshuriken SVG
+// Naruto Uzumaki Spiral & 4-Blade Rasenshuriken SVG (Optimized Vector without heavy live filter rasterization)
 export const UzumakiRasenshurikenSVG: React.FC<{
   className?: string;
   size?: number;
-  glow?: boolean;
-}> = ({ className = '', size = 520, glow = true }) => {
+}> = ({ className = '', size = 520 }) => {
   return (
     <svg
       width={size}
@@ -15,29 +13,25 @@ export const UzumakiRasenshurikenSVG: React.FC<{
       viewBox="0 0 400 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${className} ${glow ? 'naruto-glow' : ''}`}
+      className={className}
+      style={{ willChange: 'transform' }}
     >
       <defs>
         <radialGradient id="narutoBgCore" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#facc15" stopOpacity="0.95" />
-          <stop offset="30%" stopColor="#f97316" stopOpacity="0.8" />
-          <stop offset="70%" stopColor="#c2410c" stopOpacity="0.5" />
+          <stop offset="35%" stopColor="#f97316" stopOpacity="0.8" />
+          <stop offset="75%" stopColor="#c2410c" stopOpacity="0.5" />
           <stop offset="100%" stopColor="#431407" stopOpacity="0" />
         </radialGradient>
-
-        <filter id="chakraBloom" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="6" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
       </defs>
 
       {/* Outer Golden Concentric Rings */}
-      <circle cx="200" cy="200" r="185" stroke="#f97316" strokeWidth="2.5" strokeOpacity="0.4" filter="url(#chakraBloom)" />
-      <circle cx="200" cy="200" r="160" stroke="#facc15" strokeWidth="1.5" strokeOpacity="0.3" strokeDasharray="6 8" />
+      <circle cx="200" cy="200" r="185" stroke="#f97316" strokeWidth="2" strokeOpacity="0.45" />
+      <circle cx="200" cy="200" r="160" stroke="#facc15" strokeWidth="1.5" strokeOpacity="0.35" strokeDasharray="6 8" />
       <circle cx="200" cy="200" r="130" stroke="#ea580c" strokeWidth="1" strokeOpacity="0.5" />
 
       {/* 4-Blade Rasenshuriken Energy Wings */}
-      <g filter="url(#chakraBloom)">
+      <g>
         {[0, 90, 180, 270].map((angle, i) => (
           <path
             key={i}
@@ -47,14 +41,14 @@ export const UzumakiRasenshurikenSVG: React.FC<{
             fill="#f97316"
             fillOpacity="0.45"
             stroke="#facc15"
-            strokeWidth="2"
+            strokeWidth="1.5"
             transform={`rotate(${angle} 200 200)`}
           />
         ))}
       </g>
 
       {/* Central Core Uzumaki Chakra Seal */}
-      <circle cx="200" cy="200" r="60" fill="url(#narutoBgCore)" stroke="#facc15" strokeWidth="3" />
+      <circle cx="200" cy="200" r="60" fill="url(#narutoBgCore)" stroke="#facc15" strokeWidth="2.5" />
       <circle cx="200" cy="200" r="48" fill="#ea580c" />
 
       {/* Uzumaki Spiral */}
@@ -71,7 +65,7 @@ export const UzumakiRasenshurikenSVG: React.FC<{
            C 200 190, 204 194, 204 198"
         fill="none"
         stroke="#ffffff"
-        strokeWidth="5"
+        strokeWidth="4"
         strokeLinecap="round"
       />
     </svg>
@@ -79,11 +73,11 @@ export const UzumakiRasenshurikenSVG: React.FC<{
 };
 
 // Konoha Autumn Leaf SVG Particle
-export const KonohaLeafSVG: React.FC<{ size?: number; className?: string }> = ({ size = 28, className = '' }) => {
+export const KonohaLeafSVG: React.FC<{ size?: number; className?: string }> = ({ size = 26, className = '' }) => {
   return (
     <svg
       width={size}
-      height={size * 1.4}
+      height={size * 1.3}
       viewBox="0 0 36 50"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -96,16 +90,11 @@ export const KonohaLeafSVG: React.FC<{ size?: number; className?: string }> = ({
            C12 50, 4 46, 2 38 
            C0 24, 8 10, 18 0 Z"
         fill="#ea580c"
-        fillOpacity="0.85"
+        fillOpacity="0.8"
         stroke="#facc15"
         strokeWidth="1"
       />
-      {/* Central Spine */}
-      <path d="M18 4 Q18 28 18 46" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
-      {/* Leaf veins */}
-      <path d="M18 16 Q24 20 28 24" stroke="#d97706" strokeWidth="0.8" />
-      <path d="M18 24 Q10 28 6 32" stroke="#d97706" strokeWidth="0.8" />
-      <path d="M18 32 Q25 36 29 40" stroke="#d97706" strokeWidth="0.8" />
+      <path d="M18 4 Q18 28 18 46" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 };
@@ -115,104 +104,43 @@ interface NarutoBackgroundProps {
 }
 
 export const NarutoBackground: React.FC<NarutoBackgroundProps> = ({ isActivated = false }) => {
-  const { currentTheme } = useThemeStore();
-  const spiralControls = useAnimationControls();
-  const [rapidSpinning, setRapidSpinning] = useState(false);
-
-  // Periodic Rapid Rasenshuriken activation every 10 seconds
-  useEffect(() => {
-    let isCancelled = false;
-
-    const runActivationCycle = async () => {
-      while (!isCancelled) {
-        setRapidSpinning(false);
-        await spiralControls.start({
-          rotate: [0, 180],
-          filter: 'blur(0px) drop-shadow(0 0 35px rgba(249, 115, 22, 0.45))',
-          transition: { duration: 9, ease: 'linear' },
-        });
-
-        if (isCancelled) break;
-
-        // Rapid Rasengan Chakra Blast
-        setRapidSpinning(true);
-        await spiralControls.start({
-          rotate: [180, 900],
-          filter: 'blur(3px) drop-shadow(0 0 80px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 40px rgba(249, 115, 22, 0.9))',
-          transition: { duration: 1.1, ease: 'easeInOut' },
-        });
-
-        spiralControls.set({ rotate: 0 });
-      }
-    };
-
-    runActivationCycle();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [spiralControls]);
-
-  useEffect(() => {
-    if (isActivated) {
-      spiralControls.start({
-        rotate: [0, 1080],
-        filter: 'blur(4px) drop-shadow(0 0 90px rgba(249, 115, 22, 1)) drop-shadow(0 0 45px rgba(250, 204, 21, 1))',
-        scale: [1, 1.15, 1],
-        transition: { duration: 1.2, ease: 'easeInOut' },
-      });
-    }
-  }, [isActivated, spiralControls]);
-
-  // Leaf particles floating down (Konoha Leaves)
+  // Lightweight set of 10 leaves for buttery 60fps performance
   const leaves = useMemo(() => {
-    return Array.from({ length: 20 }).map((_, i) => ({
+    return Array.from({ length: 10 }).map((_, i) => ({
       id: i,
-      left: `${(i * 5.1) % 96 + 2}%`,
-      delay: (i * 0.7) % 12,
-      duration: 10 + (i % 6) * 2,
-      size: 22 + (i % 4) * 6,
+      left: `${(i * 10) % 94 + 3}%`,
+      delay: (i * 1.3) % 10,
+      duration: 12 + (i % 4) * 2.5,
+      size: 22 + (i % 3) * 5,
     }));
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 transform-gpu">
       {/* Base Dark Ground */}
       <div className="absolute inset-0 bg-[#060403]" />
 
-      {/* Studio Lighting Bokeh */}
+      {/* Studio Lighting Radial Atmosphere */}
       <div 
         className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 40%), radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 45%), radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.3) 0%, transparent 65%)',
+          background: 'radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%), radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 45%), radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.25) 0%, transparent 65%)',
         }}
       />
 
       {/* Kurama Flame / Sage Chakra Atmosphere */}
       <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[140vw] h-[85vh] opacity-80 pointer-events-none transition-opacity duration-1000"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[130vw] h-[80vh] opacity-75 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 65% 55% at 50% -10%, rgba(234, 88, 12, 0.85) 0%, rgba(154, 52, 18, 0.5) 45%, rgba(6, 4, 3, 0.95) 85%, #060403 100%)',
+          background: 'radial-gradient(ellipse 65% 55% at 50% -10%, rgba(234, 88, 12, 0.75) 0%, rgba(154, 52, 18, 0.4) 45%, rgba(6, 4, 3, 0.95) 85%, #060403 100%)',
         }}
       />
 
-      {/* Floating Rotating Rasenshuriken & Uzumaki Spiral Motif */}
-      <div className="absolute top-[2%] left-1/2 -translate-x-1/2 flex items-center justify-center opacity-30 md:opacity-35 pointer-events-none transition-all duration-700">
-        <motion.div
-          animate={spiralControls}
-          className="relative flex items-center justify-center"
-        >
-          <UzumakiRasenshurikenSVG size={640} />
-          
-          {rapidSpinning && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0.8 }}
-              animate={{ scale: 1.6, opacity: 0 }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full border-2 border-amber-400 shadow-[0_0_60px_rgba(250,204,21,0.8)]"
-            />
-          )}
-        </motion.div>
+      {/* Rotating Rasenshuriken & Uzumaki Spiral (Pure Hardware-Accelerated CSS) */}
+      <div className="absolute top-[2%] left-1/2 -translate-x-1/2 flex items-center justify-center opacity-30 md:opacity-35 pointer-events-none">
+        <div className={`rasenshuriken-spin ${isActivated ? 'animate-pulse scale-105' : ''}`}>
+          <UzumakiRasenshurikenSVG size={580} />
+        </div>
       </div>
 
       {/* Konoha Autumn Leaves Drifting Downward */}
@@ -228,36 +156,8 @@ export const NarutoBackground: React.FC<NarutoBackgroundProps> = ({ isActivated 
               animationDelay: `-${l.delay}s`,
             }}
           >
-            <KonohaLeafSVG size={l.size} className="drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] opacity-65" />
+            <KonohaLeafSVG size={l.size} className="opacity-60" />
           </div>
-        ))}
-      </div>
-
-      {/* Floating Golden Sage Chakra Sparks */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-60">
-        {Array.from({ length: 16 }).map((_, i) => (
-          <motion.div
-            key={`spark-${i}`}
-            className="absolute rounded-full bg-amber-400"
-            style={{
-              width: (i % 3) + 2,
-              height: (i % 3) + 2,
-              left: `${(i * 6.2) % 100}%`,
-              bottom: `${(i * 6.8) % 100}%`,
-              boxShadow: '0 0 10px #facc15',
-            }}
-            animate={{
-              y: [-10, -90, -170],
-              opacity: [0, 0.9, 0],
-              scale: [0.5, 1.3, 0.2],
-            }}
-            transition={{
-              duration: 4 + (i % 4),
-              repeat: Infinity,
-              delay: (i * 0.35),
-              ease: 'easeOut',
-            }}
-          />
         ))}
       </div>
     </div>
