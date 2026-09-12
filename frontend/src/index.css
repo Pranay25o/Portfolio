@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-obsidian: #050302;
+    --color-uzumaki-orange: #f97316;
+    --color-kurama-glow: #ea580c;
+    --color-rasengan-cyan: #0ea5e9;
+    --color-sage-gold: #facc15;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #030201;
+    color: #f8fafc;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom Smooth Dark Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #050302;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #ea580c;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f97316;
+  }
+}
+
+@layer utilities {
+  /* Master Uzumaki Obsidian Glassmorphism */
+  .glass-card {
+    background: rgba(10, 6, 4, 0.72);
+    backdrop-filter: blur(24px) contrast(120%);
+    -webkit-backdrop-filter: blur(24px) contrast(120%);
+    border-top: 1px solid rgba(249, 115, 22, 0.45);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-card-subtle {
+    background: rgba(15, 9, 6, 0.58);
+    backdrop-filter: blur(16px) contrast(115%);
+    -webkit-backdrop-filter: blur(16px) contrast(115%);
+    border-top: 1px solid rgba(249, 115, 22, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+    border-left: 1px solid rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .glass-pill {
+    background: rgba(10, 6, 4, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+  }
+
+  .glass-pill:hover {
+    border-color: rgba(249, 115, 22, 0.7);
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+  }
+
+  /* Kurama Flame / Sage Chakra Hover Shadow */
+  .amaterasu-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .amaterasu-hover:hover {
+    box-shadow: 0 0 30px -5px rgba(0, 0, 0, 1), 0 0 18px rgba(249, 115, 22, 0.65);
+    border-color: rgba(249, 115, 22, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .amaterasu-button {
+    box-shadow: 0 0 20px -3px rgba(249, 115, 22, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .amaterasu-button:hover {
+    box-shadow: 0 0 35px 2px rgba(249, 115, 22, 0.85), 0 0 50px -5px rgba(0, 0, 0, 1), inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .text-glow-orange {
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.65), 0 2px 10px rgba(234, 88, 12, 0.4);
+  }
+}
+
+/* Konoha Leaf / Chakra Floating Animation */
+@keyframes leaf-float {
+  0% {
+    transform: translateY(-10vh) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(50vh) translateX(40px) rotate(180deg);
+    opacity: 0.7;
+  }
+  88% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(110vh) translateX(-25px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.leaf-particle {
+  position: absolute;
+  pointer-events: none;
+  animation: leaf-float linear infinite;
+}
+
+/* Rasenshuriken / Uzumaki Pulse */
+@keyframes rasengan-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 30px rgba(249, 115, 22, 0.4)) drop-shadow(0 0 15px rgba(14, 165, 233, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 65px rgba(249, 115, 22, 0.85)) drop-shadow(0 0 35px rgba(250, 204, 21, 0.6)) blur(0.5px);
+  }
+}
+
+.naruto-glow {
+  animation: rasengan-pulse 5s ease-in-out infinite;
+}
