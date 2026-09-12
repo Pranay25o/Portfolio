@@ -10,46 +10,35 @@ interface ChakraTransitionWrapperProps {
 
 export const ChakraTransitionWrapper: React.FC<ChakraTransitionWrapperProps> = ({
   children,
-  activeSectionKey,
   triggerChakra = 0,
 }) => {
   const [isPulsing, setIsPulsing] = useState(false);
 
   useEffect(() => {
-    setIsPulsing(true);
-    soundManager.playGlitch();
-    const timer = setTimeout(() => {
-      setIsPulsing(false);
-    }, 160);
-
-    return () => clearTimeout(timer);
-  }, [activeSectionKey, triggerChakra]);
+    if (triggerChakra > 0) {
+      setIsPulsing(true);
+      const timer = setTimeout(() => {
+        setIsPulsing(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [triggerChakra]);
 
   return (
     <div className="relative w-full">
-      {/* Kurama Sage Orange Chakra Warp Wave (No Blinding White Flash) */}
+      {/* Kurama Sage Orange Chakra Warp Wave on explicit click trigger */}
       {isPulsing && (
-        <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
-          <div className="absolute top-[18%] left-0 right-0 h-1 bg-orange-500/80 shadow-[0_0_15px_#f97316] translate-x-1" />
-          <div className="absolute top-[52%] left-0 right-0 h-1.5 bg-amber-400/80 shadow-[0_0_20px_#facc15] -translate-x-1" />
-          <div className="absolute top-[80%] left-0 right-0 h-1 bg-orange-600/80 shadow-[0_0_12px_#ea580c] translate-x-2" />
-          <div className="absolute inset-0 border-2 border-orange-500/50 rounded-3xl shadow-[inset_0_0_40px_rgba(249,115,22,0.3)] animate-pulse" />
+        <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+          <div className="absolute top-[18%] left-0 right-0 h-1 bg-orange-500/80 shadow-[0_0_15px_#f97316]" />
+          <div className="absolute top-[52%] left-0 right-0 h-1.5 bg-amber-400/80 shadow-[0_0_20px_#facc15]" />
+          <div className="absolute top-[80%] left-0 right-0 h-1 bg-orange-600/80 shadow-[0_0_12px_#ea580c]" />
         </div>
       )}
 
-      {/* Smooth Cinematic Content Cross-Fade */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeSectionKey}
-          initial={{ opacity: 0, y: 12, filter: 'blur(3px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -12, filter: 'blur(3px)' }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full"
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      {/* Stably mounted content with zero scroll interruptions */}
+      <div className="w-full">
+        {children}
+      </div>
     </div>
   );
 };
