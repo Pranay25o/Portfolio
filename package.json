@@ -1,0 +1,10 @@
+{
+  "name": "pranay-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix frontend",
+    "dev": "npm run dev --prefix frontend",
+    "start": "node backend/server.js"
+  }
+}
