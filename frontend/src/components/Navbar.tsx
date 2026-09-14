@@ -31,7 +31,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="fixed top-0 left-0 right-0 z-40 px-3 sm:px-6 py-4 transition-all">
       <div className="max-w-7xl mx-auto">
-        <nav className="glass-card rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-2xl transition-all border-t border-orange-500/40">
+        {/*
+         * GHOSTING FIX: Using glass-card-navbar instead of glass-card.
+         * position:fixed + backdrop-filter:blur is the #1 cause of mobile scroll ghosting.
+         * glass-card-navbar uses a higher opacity fallback and a stronger blur (16px
+         * vs 10px) so it still blurs the background when supported, but the opaque
+         * fallback prevents any frame bleeding when it's not.
+         */}
+        <nav className="glass-card-navbar rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-2xl transition-all border-t border-orange-500/40">
           
           {/* Left Brand with Uzumaki Crest */}
           <div className="flex items-center gap-3">
@@ -109,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-2 glass-card rounded-2xl p-4 shadow-2xl border-t border-orange-500/40 space-y-2 animate-fadeIn">
+          <div className="md:hidden mt-2 glass-card-navbar rounded-2xl p-4 shadow-2xl border-t border-orange-500/40 space-y-2 animate-fadeIn">
             {navItems.map((item) => (
               <button
                 key={item.id}

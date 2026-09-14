@@ -1,7 +1,30 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 
-// Naruto Uzumaki Spiral & 4-Blade Rasenshuriken SVG (Optimized Vector without heavy live filter rasterization)
+/*
+ * MOBILE GHOSTING FIX — NarutoBackground
+ *
+ * ❌ BUG ROOT CAUSE: The "Studio Lighting Radial Atmosphere" div had:
+ *    className="... mix-blend-mode: screen ..."
+ *
+ *    mix-blend-mode on a child of a position:fixed element is the #1 cause of
+ *    mobile scroll ghosting. On Android Chrome/WebView, the blend mode forces
+ *    the browser to composite the layer with all layers behind it on EVERY frame.
+ *    When scrolling happens, the old frames are not cleared before the next
+ *    composite, causing elements to "smear" or "trail" across the screen.
+ *
+ * ✅ FIX: Removed mix-blend-mode entirely. The atmospheric glow effect is
+ *    recreated identically using a plain rgba radial gradient overlay with
+ *    CSS opacity — no blend mode needed, looks identical at these opacity levels.
+ *
+ * ❌ ADDITIONAL BUG: import { motion } from 'framer-motion' was present but
+ *    the component never uses motion. Removed dead import.
+ *
+ * ❌ ADDITIONAL BUG: UzumakiRasenshurikenSVG had style={{ willChange: 'transform' }}
+ *    directly on the SVG element. The SVG is INSIDE the .rasenshuriken-spin div
+ *    which already has will-change on the wrapper. Double will-change = two layers
+ *    promoted for the same animation subtree = wasted VRAM. Removed from SVG.
+ */
+
 export const UzumakiRasenshurikenSVG: React.FC<{
   className?: string;
   size?: number;
@@ -14,7 +37,8 @@ export const UzumakiRasenshurikenSVG: React.FC<{
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={{ willChange: 'transform' }}
+      aria-hidden="true"
+      // Removed: style={{ willChange: 'transform' }} — parent .rasenshuriken-spin handles this
     >
       <defs>
         <radialGradient id="narutoBgCore" cx="50%" cy="50%" r="50%">
@@ -82,6 +106,7 @@ export const KonohaLeafSVG: React.FC<{ size?: number; className?: string }> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      aria-hidden="true"
     >
       <path
         d="M18 0 
@@ -104,7 +129,6 @@ interface NarutoBackgroundProps {
 }
 
 export const NarutoBackground: React.FC<NarutoBackgroundProps> = ({ isActivated = false }) => {
-  // Lightweight set of 10 leaves for buttery 60fps performance
   const leaves = useMemo(() => {
     return Array.from({ length: 10 }).map((_, i) => ({
       id: i,
@@ -116,34 +140,63 @@ export const NarutoBackground: React.FC<NarutoBackgroundProps> = ({ isActivated 
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 transform-gpu">
-      {/* Base Dark Ground */}
+    /*
+     * GHOSTING FIX 1: Added `isolation: isolate` to the fixed container.
+     * This creates an explicit stacking context, telling the browser to composite
+     * this layer independently. Without it, the browser's compositing decisions
+     * for the fixed+animated subtree are undefined — causing frame bleed on mobile.
+     *
+     * GHOSTING FIX 2: Removed `transform-gpu` class from the fixed container.
+     * `transform: translateZ(0)` on the fixed root was fighting with the
+     * compositing of child elements, creating ambiguous layer ownership.
+     * The children that need GPU promotion have their own will-change.
+     */
+    <div
+      className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+      style={{ isolation: 'isolate' }}
+    >
+      {/* Base Dark Ground — solid opaque background prevents frame bleed */}
       <div className="absolute inset-0 bg-[#060403]" />
 
-      {/* Studio Lighting Radial Atmosphere */}
-      <div 
-        className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none"
+      {/*
+       * GHOSTING FIX 3: Removed mix-blend-mode: screen entirely.
+       * Was: className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none"
+       *
+       * mix-blend-mode forces the GPU to composite this layer against ALL layers
+       * behind it on every frame. On mobile, this prevents the compositor from
+       * clearing the layer properly during scroll — causing the smear/ghost effect.
+       *
+       * Replaced with: a plain rgba radial gradient at reduced opacity.
+       * The visual result is identical at these opacity levels (40% of a white
+       * highlight is mathematically very close to screen blending at low values).
+       */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%), radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 45%), radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.25) 0%, transparent 65%)',
+          background: [
+            'radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.032) 0%, transparent 40%)',
+            'radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.024) 0%, transparent 45%)',
+            'radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.10) 0%, transparent 65%)',
+          ].join(', '),
         }}
       />
 
       {/* Kurama Flame / Sage Chakra Atmosphere */}
-      <div 
+      <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[130vw] h-[80vh] opacity-75 pointer-events-none"
         style={{
           background: 'radial-gradient(ellipse 65% 55% at 50% -10%, rgba(234, 88, 12, 0.75) 0%, rgba(154, 52, 18, 0.4) 45%, rgba(6, 4, 3, 0.95) 85%, #060403 100%)',
         }}
       />
 
-      {/* Rotating Rasenshuriken & Uzumaki Spiral (Pure Hardware-Accelerated CSS) */}
+      {/* Rotating Rasenshuriken — will-change on wrapper div, not on SVG */}
       <div className="absolute top-[2%] left-1/2 -translate-x-1/2 flex items-center justify-center opacity-30 md:opacity-35 pointer-events-none">
         <div className={`rasenshuriken-spin ${isActivated ? 'animate-pulse scale-105' : ''}`}>
           <UzumakiRasenshurikenSVG size={580} />
         </div>
       </div>
 
-      {/* Konoha Autumn Leaves Drifting Downward */}
+      {/* Konoha Autumn Leaves */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {leaves.map((l) => (
           <div

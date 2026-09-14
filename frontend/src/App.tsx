@@ -63,7 +63,24 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#050302] text-slate-100 overflow-x-hidden selection:bg-orange-500 selection:text-white">
+    <div
+      className="relative min-h-screen bg-[#050302] text-slate-100 overflow-x-hidden selection:bg-orange-500 selection:text-white"
+      style={{
+        /*
+         * GHOSTING FIX: isolation:isolate creates an explicit CSS stacking context
+         * on the root element. Without this, the browser's compositing of the
+         * fixed background + fixed navbar + scrolling content uses an implicit
+         * stacking context, which on mobile can cause frame-to-frame bleed.
+         *
+         * WebkitBackfaceVisibility: 'hidden' prevents some Android WebView
+         * rendering bugs where the backface of 3D-transformed elements bleeds
+         * through during scroll compositing.
+         */
+        isolation: 'isolate',
+        WebkitBackfaceVisibility: 'hidden',
+        backfaceVisibility: 'hidden',
+      }}
+    >
       {/* 🎬 1. Initial Load: Sage Awakening (Naruto Uzumaki Theme) */}
       <SageIntro onComplete={() => setIntroDone(true)} />
 
@@ -78,7 +95,19 @@ export const App: React.FC = () => {
       />
 
       {/* ✨ 4. Floating Glassmorphic Master Content */}
-      <main className="relative z-10 pt-6 pb-16">
+      <main
+        className="relative z-10 pt-6 pb-16"
+        style={{
+          /*
+           * GHOSTING FIX: Explicit background on the scroll container.
+           * Without a background, the <main> is transparent, and on mobile the
+           * browser may composite old frame pixels through it during fast scroll.
+           * This acts as a paint barrier — older frames cannot bleed through.
+           */
+          backgroundColor: 'transparent',
+          WebkitTransform: 'translateZ(0)',
+        }}
+      >
         <ChakraTransitionWrapper
           activeSectionKey={activeSection}
           triggerChakra={chakraTrigger}

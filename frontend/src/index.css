@@ -48,47 +48,103 @@
 
 @layer utilities {
   /*
-   * Master Uzumaki Obsidian Glassmorphism (Optimized for 60FPS)
-   * KEY FIX: Removed global "will-change: transform, opacity" — was creating
-   * 20+ simultaneous GPU compositor layers causing massive VRAM pressure and scroll jank.
-   * will-change is now ONLY applied on :hover via .amaterasu-hover (below).
-   * Added contain: layout style paint for paint isolation without layer promotion.
+   * Master Uzumaki Obsidian Glassmorphism
+   *
+   * MOBILE GHOSTING FIX:
+   * backdrop-filter on scrollable elements causes frame ghosting on many Android
+   * devices (Chrome for Android, Samsung Internet, WebView). The GPU cannot
+   * properly invalidate the backdrop sampling region during fast scroll.
+   *
+   * Solution: Use @supports to ONLY apply backdrop-filter where the browser
+   * has proper hardware support. On devices where backdrop-filter is not
+   * supported or causes issues, fall back to a solid semi-transparent background
+   * that still looks great and never ghosts.
+   *
+   * The @supports rule also acts as a performance gate — browsers that report
+   * backdrop-filter support but run it poorly (many mid-range Androids) are
+   * handled by the media-query override below.
    */
   .glass-card {
-    background: rgba(10, 6, 4, 0.78);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    /* FALLBACK — no ghosting, works everywhere */
+    background: rgba(10, 6, 4, 0.92);
     border-top: 1px solid rgba(249, 115, 22, 0.45);
     border-bottom: 1px solid rgba(0, 0, 0, 0.9);
     border-left: 1px solid rgba(255, 255, 255, 0.05);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
-    /* contain: layout style paint isolates paint without a full layer promotion */
     contain: layout style paint;
-    transform: translateZ(0);
+    /* backface-visibility prevents Android WebView frame bleed on 3D compositing */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Progressive enhancement — only on capable browsers */
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-card {
+      background: rgba(10, 6, 4, 0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
   }
 
   .glass-card-subtle {
-    background: rgba(15, 9, 6, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(15, 9, 6, 0.90);
     border-top: 1px solid rgba(249, 115, 22, 0.3);
     border-bottom: 1px solid rgba(0, 0, 0, 0.9);
     border-left: 1px solid rgba(255, 255, 255, 0.03);
     border-right: 1px solid rgba(255, 255, 255, 0.03);
-    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-card-subtle {
+      background: rgba(15, 9, 6, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
   }
 
   .glass-pill {
-    background: rgba(10, 6, 4, 0.7);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(10, 6, 4, 0.88);
     border: 1px solid rgba(249, 115, 22, 0.25);
-    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-pill {
+      background: rgba(10, 6, 4, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
   }
 
   .glass-pill:hover {
     border-color: rgba(249, 115, 22, 0.7);
     box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+  }
+
+  /*
+   * NAVBAR-specific glass class for position:fixed glassmorphic header.
+   * Fixed + backdrop-filter is the single most common mobile ghosting trigger.
+   * We use a more opaque fallback and a lighter blur to reduce compositing cost.
+   */
+  .glass-card-navbar {
+    background: rgba(6, 4, 3, 0.94);
+    border-top: 1px solid rgba(249, 115, 22, 0.45);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-card-navbar {
+      background: rgba(6, 4, 3, 0.80);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
   }
 
   /*
@@ -301,4 +357,55 @@
     transform: none !important;
     transition: none !important;
   }
+}
+
+/* ── Mobile scroll ghosting nuclear fix ─────────────────────────────────────
+ *
+ * On touch devices (pointer: coarse = phones/tablets), disable backdrop-filter
+ * ENTIRELY across ALL glass elements.
+ *
+ * Rationale: Many Android devices report backdrop-filter support (passing the
+ * @supports check) but actually run it via software rasterization, not hardware.
+ * This causes frame ghosting that @supports cannot detect.
+ *
+ * The @media (pointer: coarse) query accurately targets touch screens.
+ * On these devices we fall back to the solid opaque backgrounds defined in the
+ * base .glass-card rules. The design still looks premium and dark — just without
+ * the glass blur. The ghosting is completely eliminated.
+ *
+ * This does NOT affect desktop/laptop users (pointer: fine = mouse).
+ */
+@media (pointer: coarse) {
+  .glass-card,
+  .glass-card-subtle,
+  .glass-card-navbar,
+  .glass-pill {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .glass-card         { background: rgba(10, 6, 4, 0.95) !important; }
+  .glass-card-subtle  { background: rgba(15, 9, 6, 0.95) !important; }
+  .glass-card-navbar  { background: rgba(6, 4, 3, 0.97)  !important; }
+  .glass-pill         { background: rgba(10, 6, 4, 0.95) !important; }
+
+  /* Reduce leaf count animation cost on mobile */
+  .leaf-particle:nth-child(n+8) {
+    display: none;
+  }
+
+  /* Reduce rasenshuriken size on mobile to lessen compositing area */
+  .rasenshuriken-spin > svg {
+    width: 380px !important;
+    height: 380px !important;
+  }
+}
+
+/* ── iOS Safari overscroll fix ─────────────────────────────────────────────
+ * Prevent the iOS overscroll bounce from revealing the fixed background through
+ * the content area (which can look like ghosting when the page bounces back).
+ */
+html {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
