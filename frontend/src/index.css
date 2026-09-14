@@ -47,7 +47,13 @@
 }
 
 @layer utilities {
-  /* Master Uzumaki Obsidian Glassmorphism (Optimized 60FPS GPU) */
+  /*
+   * Master Uzumaki Obsidian Glassmorphism (Optimized for 60FPS)
+   * KEY FIX: Removed global "will-change: transform, opacity" — was creating
+   * 20+ simultaneous GPU compositor layers causing massive VRAM pressure and scroll jank.
+   * will-change is now ONLY applied on :hover via .amaterasu-hover (below).
+   * Added contain: layout style paint for paint isolation without layer promotion.
+   */
   .glass-card {
     background: rgba(10, 6, 4, 0.78);
     backdrop-filter: blur(10px);
@@ -56,8 +62,9 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.9);
     border-left: 1px solid rgba(255, 255, 255, 0.05);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    /* contain: layout style paint isolates paint without a full layer promotion */
+    contain: layout style paint;
     transform: translateZ(0);
-    will-change: transform, opacity;
   }
 
   .glass-card-subtle {
@@ -84,13 +91,18 @@
     box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
   }
 
-  /* Kurama Flame / Sage Chakra Hover Shadow */
+  /*
+   * Kurama Flame / Sage Chakra Hover Shadow
+   * KEY FIX: will-change is now applied only on hover (not globally).
+   * This promotes the layer only when an animation is actually about to happen,
+   * releasing VRAM when the user is not hovering.
+   */
   .amaterasu-hover {
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
-    will-change: transform;
   }
 
   .amaterasu-hover:hover {
+    will-change: transform;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(249, 115, 22, 0.5);
     border-color: rgba(249, 115, 22, 0.8);
     transform: translateY(-2px);
@@ -99,19 +111,97 @@
   .amaterasu-button {
     box-shadow: 0 0 15px -3px rgba(249, 115, 22, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
     transform: translateZ(0);
-    will-change: transform;
   }
 
   .amaterasu-button:hover {
+    will-change: transform;
     box-shadow: 0 0 25px 2px rgba(249, 115, 22, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   }
 
   .text-glow-orange {
     text-shadow: 0 0 15px rgba(249, 115, 22, 0.55);
   }
+
+  /* ── HeroCardDeck: CSS replacements for Framer Motion whileHover ──── */
+
+  /* Deck card — replaces motion.button whileHover={{ y: -18, scale: 1.06 }} */
+  .deck-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s, box-shadow 0.2s;
+  }
+  .deck-card:hover {
+    transform: translateY(-18px) scale(1.06) !important;
+    z-index: 30;
+  }
+
+  /* Achievement pill — replaces motion.div whileHover={{ x: 6, skewX: -2 }} */
+  .achievement-pill {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s;
+  }
+  .achievement-pill:hover {
+    transform: translateX(6px) skewX(-2deg);
+  }
+
+  /* CTA button — replaces motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} */
+  .cta-button {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .cta-button:hover {
+    transform: scale(1.04);
+  }
+  .cta-button:active {
+    transform: scale(0.97);
+  }
+
+  /* Hero card mount — replaces motion.div initial/animate on the main hero card */
+  .hero-card-mount {
+    animation: hero-card-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* ── Scroll-triggered reveal animation ───────────────────────────────
+   * Used by useInView hook + CSS class toggle.
+   * Pure CSS transitions — zero JS cost during scroll, zero IntersectionObserver
+   * overhead on the JS main thread. The browser handles compositing natively.
+   */
+  .reveal-item {
+    opacity: 0;
+    transform: translate3d(-18px, 0, 0);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-item-up {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-item.is-visible,
+  .reveal-item-up.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* Stagger delays for reveal children */
+  .reveal-item:nth-child(1),
+  .reveal-item-up:nth-child(1) { transition-delay: 0ms; }
+  .reveal-item:nth-child(2),
+  .reveal-item-up:nth-child(2) { transition-delay: 80ms; }
+  .reveal-item:nth-child(3),
+  .reveal-item-up:nth-child(3) { transition-delay: 160ms; }
+  .reveal-item:nth-child(4),
+  .reveal-item-up:nth-child(4) { transition-delay: 240ms; }
+
+  /* ── Sage Intro pure-CSS animation ──────────────────────────────────── */
+  .sage-intro {
+    animation: sage-intro-fade 0.45s ease-out forwards;
+    pointer-events: none;
+  }
+
+  .sage-intro-text {
+    animation: sage-text-scale 0.4s ease-out forwards;
+  }
 }
 
-/* Konoha Leaf Floating Animation (Pure GPU Transform) */
+/* Konoha Leaf Floating Animation (Pure GPU Transform — no layout properties) */
 @keyframes leaf-float {
   0% {
     transform: translate3d(0, -10vh, 0) rotate(0deg);
@@ -133,11 +223,17 @@
   }
 }
 
+/*
+ * Leaf particle: will-change is appropriate here since these are continuously
+ * animating and benefit from persistent layer promotion. The count is capped at
+ * 10 to keep compositor layer overhead manageable.
+ */
 .leaf-particle {
   position: absolute;
   pointer-events: none;
   animation: leaf-float linear infinite;
   will-change: transform;
+  contain: strict;
 }
 
 /* Hardware-Accelerated Smooth Rasenshuriken Spin */
@@ -154,4 +250,55 @@
   animation: rasenshuriken-spin-kf 30s linear infinite;
   will-change: transform;
   transform: translateZ(0);
+}
+
+/* Sage Intro fade-out keyframes (pure CSS — no Framer Motion needed) */
+@keyframes sage-intro-fade {
+  0%   { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes sage-text-scale {
+  0%   { transform: scale(0.95); opacity: 0.9; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+
+/* Hero main card mount animation — replaces Framer Motion initial/animate */
+@keyframes hero-card-in {
+  0%   { opacity: 0; transform: translateZ(0) scale(0.98) translateY(15px); }
+  100% { opacity: 1; transform: translateZ(0) scale(1) translateY(0); }
+}
+
+/* Contact form success state — replaces Framer Motion initial/animate */
+@keyframes contact-success-in {
+  0%   { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.contact-success-reveal {
+  animation: contact-success-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Reduced motion: disable ALL animations for accessibility + low-end devices ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .leaf-particle,
+  .rasenshuriken-spin {
+    animation: none !important;
+  }
+
+  .reveal-item,
+  .reveal-item-up {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

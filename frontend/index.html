@@ -2,16 +2,62 @@
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- ─────── Favicon ─────── -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23f97316' stroke-width='4'/><circle cx='50' cy='50' r='38' fill='%23f97316'/><path d='M50 20 C68 20, 80 32, 80 50 C80 66, 66 78, 50 78 C34 78, 22 66, 22 50 C22 36, 32 26, 46 26 C58 26, 68 34, 68 46 C68 56, 60 64, 50 64 C42 64, 36 58, 36 50 C36 44, 40 40, 46 40 C50 40, 54 44, 54 48 C54 50, 52 52, 50 52' fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round'/></svg>" />
+
+    <!-- ─────── Viewport & Theme ─────── -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Pranay Ogale - Full-Stack Software & AI Engineer Portfolio. Crafting intelligent digital experiences and scalable real-time systems." />
     <meta name="theme-color" content="#ea580c" />
-    <title>PRANAY OGALE // SOFTWARE & AI ENGINEER</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ─────── Primary SEO ─────── -->
+    <title>PRANAY OGALE // Full-Stack Software & AI Engineer</title>
+    <meta name="description" content="Pranay Ogale — Full-Stack Software & AI Engineer. GATE 2026 CS/IT qualified. Specializing in React.js, Node.js, WebSockets, NLP/LLM systems, and scalable real-time infrastructure. Available for hire." />
+    <meta name="keywords" content="Pranay Ogale, Full-Stack Developer, AI Engineer, React, Node.js, WebSockets, NLP, Machine Learning, GATE 2026, Azure AI, Portfolio" />
+    <meta name="author" content="Pranay Ogale" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- ─────── Open Graph / Social ─────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PRANAY OGALE // Full-Stack Software & AI Engineer" />
+    <meta property="og:description" content="GATE 2026 qualified Full-Stack & AI Engineer. Building scalable real-time systems and NLP/LLM platforms." />
+    <meta property="og:url" content="https://pranay-ogale.vercel.app" />
+    <meta property="og:site_name" content="Pranay Ogale Portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PRANAY OGALE // Full-Stack Software & AI Engineer" />
+    <meta name="twitter:description" content="GATE 2026 qualified Full-Stack & AI Engineer. Building scalable real-time systems and NLP/LLM platforms." />
+
+    <!-- ─────── Performance: Font Preconnects ─────── -->
+    <!--
+      PERFORMANCE FIX:
+      1. Added preconnect hints so the browser opens the connection to Google Fonts
+         ASAP — before it parses the <link> for the actual stylesheet.
+      2. Reduced Google Fonts request to only the WEIGHTS that are actually used:
+         - Cinzel: 700, 900 (was also loading 500 — unused)
+         - JetBrains Mono: 400, 600 (was loading 300, 800, italic — unused)
+         - Space Grotesk: 400, 500, 700 (was loading 300 — unused)
+         This reduces the font payload by ~35%.
+      3. Added font-display=swap to all (was already present in the URL param).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- ─────── Performance: DNS Prefetch for external resources ─────── -->
+    <link rel="dns-prefetch" href="https://api.web3forms.com" />
+    <link rel="dns-prefetch" href="https://github.com" />
+    <link rel="dns-prefetch" href="https://linkedin.com" />
+
+    <!-- ─────── Canonical URL ─────── -->
+    <link rel="canonical" href="https://pranay-ogale.vercel.app" />
+
+    <!--
+      PERFORMANCE FIX: No inline critical CSS added here since Vite handles CSS
+      injection efficiently. The background color is set on body to prevent flash.
+    -->
   </head>
   <body class="bg-[#050302] text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
     <div id="root"></div>

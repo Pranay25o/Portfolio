@@ -1,9 +1,110 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { soundManager } from '../lib/sound';
-import { Briefcase, Calendar, MapPin, Sparkles, Flame, GraduationCap, Cpu, Layers } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
+import { Briefcase, Calendar, MapPin, Sparkles, Flame, GraduationCap } from 'lucide-react';
+
+/*
+ * PERFORMANCE FIX: Replaced Framer Motion motion.div + whileInView + staggered delays
+ * with a single useInView hook + CSS class toggling.
+ *
+ * Before: Each card had its own Framer Motion IntersectionObserver instance running
+ *         on the JS main thread, plus JS-driven opacity/x animation calculations
+ *         per frame. With delays, the last card was blocked for 300ms.
+ *
+ * After: One IntersectionObserver instance (useInView on the section wrapper).
+ *        All animations are pure CSS transitions — zero JS cost during scroll,
+ *        composited natively by the browser's rendering engine.
+ */
+
+interface ExperienceCardProps {
+  exp: {
+    role: string;
+    organization: string;
+    period: string;
+    location: string;
+    description: string;
+    achievements: string[];
+    tech: string[];
+    badge: string;
+  };
+  index: number;
+  isVisible: boolean;
+}
+
+const ExperienceCard: React.FC<ExperienceCardProps> = ({ exp, index, isVisible }) => {
+  return (
+    <div
+      className={`relative group reveal-item ${isVisible ? 'is-visible' : ''}`}
+      style={{ transitionDelay: `${index * 80}ms` }}
+    >
+      {/* Timeline Marker (Uzumaki Node) */}
+      <div className="absolute -left-[35px] sm:-left-[51px] top-6 w-6 h-6 rounded-full bg-black border-2 border-orange-500 flex items-center justify-center shadow-[0_0_12px_rgba(249,115,22,0.6)] group-hover:scale-125 transition-transform">
+        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+      </div>
+
+      {/* Experience Card */}
+      <div className="glass-card rounded-2xl p-6 sm:p-8 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 amaterasu-hover transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono tracking-wider font-semibold text-orange-300 bg-orange-950/80 border border-orange-500/40">
+              {exp.badge}
+            </span>
+            <h3 className="text-xl sm:text-2xl font-bold font-sans text-white group-hover:text-orange-300 transition-colors mt-2">
+              {exp.role}
+            </h3>
+            <div className="text-sm font-mono text-orange-400 font-semibold mt-0.5">
+              {exp.organization}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-orange-500" />
+              {exp.period}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-orange-500" />
+              {exp.location}
+            </span>
+          </div>
+        </div>
+
+        <p className="text-slate-300 text-sm font-sans font-light leading-relaxed mb-4">
+          {exp.description}
+        </p>
+
+        {/* Bullet Points */}
+        <div className="space-y-2 mb-6">
+          {exp.achievements.map((item, i) => (
+            <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300">
+              <Flame className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Tech Chips */}
+        <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
+          {exp.tech.map((t) => (
+            <span
+              key={t}
+              className="px-2.5 py-1 rounded-md bg-black/70 border border-orange-900/40 text-[11px] font-mono text-slate-300"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const ExperienceSection: React.FC = () => {
+  const [sectionRef, isVisible] = useInView<HTMLDivElement>({
+    threshold: 0.05,
+    rootMargin: '0px 0px -60px 0px',
+    once: true,
+  });
+
   const experiences = [
     {
       role: 'AI/ML Intern',
@@ -68,76 +169,17 @@ export const ExperienceSection: React.FC = () => {
         </div>
 
         {/* Timeline Line & Items */}
-        <div className="relative border-l-2 border-orange-950 ml-4 sm:ml-8 pl-6 sm:pl-10 space-y-10">
+        <div
+          ref={sectionRef}
+          className="relative border-l-2 border-orange-950 ml-4 sm:ml-8 pl-6 sm:pl-10 space-y-10"
+        >
           {experiences.map((exp, idx) => (
-            <motion.div
+            <ExperienceCard
               key={exp.role + exp.organization}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.15 }}
-              onMouseEnter={() => soundManager.playHover()}
-              className="relative group"
-            >
-              {/* Timeline Marker (Uzumaki Node) */}
-              <div className="absolute -left-[35px] sm:-left-[51px] top-6 w-6 h-6 rounded-full bg-black border-2 border-orange-500 flex items-center justify-center shadow-[0_0_12px_rgba(249,115,22,0.6)] group-hover:scale-125 transition-transform">
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              </div>
-
-              {/* Experience Card */}
-              <div className="glass-card rounded-2xl p-6 sm:p-8 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 amaterasu-hover transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                  <div>
-                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono tracking-wider font-semibold text-orange-300 bg-orange-950/80 border border-orange-500/40">
-                      {exp.badge}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold font-sans text-white group-hover:text-orange-300 transition-colors mt-2">
-                      {exp.role}
-                    </h3>
-                    <div className="text-sm font-mono text-orange-400 font-semibold mt-0.5">
-                      {exp.organization}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-orange-500" />
-                      {exp.period}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-orange-500" />
-                      {exp.location}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-slate-300 text-sm font-sans font-light leading-relaxed mb-4">
-                  {exp.description}
-                </p>
-
-                {/* Bullet Points */}
-                <div className="space-y-2 mb-6">
-                  {exp.achievements.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300">
-                      <Flame className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tech Chips */}
-                <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
-                  {exp.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2.5 py-1 rounded-md bg-black/70 border border-orange-900/40 text-[11px] font-mono text-slate-300"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+              exp={exp}
+              index={idx}
+              isVisible={isVisible}
+            />
           ))}
         </div>
       </div>

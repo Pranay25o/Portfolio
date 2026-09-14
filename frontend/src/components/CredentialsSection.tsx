@@ -1,10 +1,79 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { soundManager } from '../lib/sound';
+import { useInView } from '../hooks/useInView';
 import { ShieldCheck, Award, GraduationCap, CheckCircle, Star, Sparkles, FileCheck } from 'lucide-react';
 
+/*
+ * PERFORMANCE FIX: Removed all Framer Motion imports and usage.
+ * Previously had 4x motion.div with whileInView + delay staggering,
+ * each creating its own JS-thread IntersectionObserver + JS animation loop.
+ * Now uses a single CSS-class reveal pattern via useInView hook.
+ */
+
+interface Credential {
+  title: string;
+  authority: string;
+  badge: string;
+  id: string;
+  description: string;
+  verified: boolean;
+  icon: React.ReactNode;
+}
+
+interface CredentialCardProps {
+  cred: Credential;
+  index: number;
+  isVisible: boolean;
+}
+
+const CredentialCard: React.FC<CredentialCardProps> = ({ cred, index, isVisible }) => (
+  <div
+    className={`glass-card rounded-2xl p-6 sm:p-8 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 shadow-xl amaterasu-hover space-y-4 transition-all reveal-item-up ${isVisible ? 'is-visible' : ''}`}
+    style={{ transitionDelay: `${index * 80}ms` }}
+  >
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <div className="p-3 rounded-xl bg-orange-950/60 border border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.3)]">
+          {cred.icon}
+        </div>
+        <div>
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-semibold text-orange-300 bg-orange-950/80 border border-orange-500/30">
+            {cred.badge}
+          </span>
+          <h3 className="font-mono font-bold text-lg text-white mt-1.5">
+            {cred.title}
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <div className="text-xs font-mono text-orange-400/90 font-medium">
+      ISSUED BY: {cred.authority}
+    </div>
+
+    <p className="text-sm text-slate-300 font-sans font-light leading-relaxed">
+      {cred.description}
+    </p>
+
+    <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
+      <span className="flex items-center gap-1.5 text-orange-400">
+        <CheckCircle className="w-3.5 h-3.5 text-orange-500" />
+        AUTHENTICATED RECORD
+      </span>
+      <span className="text-slate-500 font-mono text-[11px]">
+        ID: {cred.id}
+      </span>
+    </div>
+  </div>
+);
+
 export const CredentialsSection: React.FC = () => {
-  const credentials = [
+  const [gridRef, isVisible] = useInView<HTMLDivElement>({
+    threshold: 0.05,
+    rootMargin: '0px 0px -60px 0px',
+    once: true,
+  });
+
+  const credentials: Credential[] = [
     {
       title: 'Qualified GATE 2026 in Computer Science & IT (CS)',
       authority: 'National GATE Committee // IIT & IISc',
@@ -61,51 +130,17 @@ export const CredentialsSection: React.FC = () => {
         </div>
 
         {/* Credentials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           {credentials.map((cred, idx) => (
-            <motion.div
+            <CredentialCard
               key={cred.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              onMouseEnter={() => soundManager.playHover()}
-              className="glass-card rounded-2xl p-6 sm:p-8 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 shadow-xl amaterasu-hover space-y-4 transition-all"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-orange-950/60 border border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.3)]">
-                    {cred.icon}
-                  </div>
-                  <div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono tracking-wider font-semibold text-orange-300 bg-orange-950/80 border border-orange-500/30">
-                      {cred.badge}
-                    </span>
-                    <h3 className="font-mono font-bold text-lg text-white mt-1.5">
-                      {cred.title}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-xs font-mono text-orange-400/90 font-medium">
-                ISSUED BY: {cred.authority}
-              </div>
-
-              <p className="text-sm text-slate-300 font-sans font-light leading-relaxed">
-                {cred.description}
-              </p>
-
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
-                <span className="flex items-center gap-1.5 text-orange-400">
-                  <CheckCircle className="w-3.5 h-3.5 text-orange-500" />
-                  AUTHENTICATED RECORD
-                </span>
-                <span className="text-slate-500 font-mono text-[11px]">
-                  ID: {cred.id}
-                </span>
-              </div>
-            </motion.div>
+              cred={cred}
+              index={idx}
+              isVisible={isVisible}
+            />
           ))}
         </div>
 

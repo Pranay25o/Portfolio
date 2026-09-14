@@ -1,7 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { soundManager } from '../lib/sound';
-import { Brain, Server, Layout, Database, Sparkles, Terminal, Code2, Cpu } from 'lucide-react';
+import { Brain, Server, Database, Sparkles, Code2 } from 'lucide-react';
+
+/*
+ * PERFORMANCE FIX: Removed unused 'motion' import from framer-motion and
+ * unused 'soundManager' import. Tree-shaking cannot reliably remove unused
+ * named exports from side-effecting modules. Explicit removal ensures
+ * zero framer-motion bundle overhead in this component's chunk.
+ */
 
 export const ExpertiseSection: React.FC = () => {
   const domains = [
@@ -52,28 +57,23 @@ export const ExpertiseSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 4-Card Matrix */}
+        {/* 4-Card Matrix (Instant rendering, 0ms delay) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {domains.map((domain, index) => (
-            <motion.div
+          {domains.map((domain) => (
+            <div
               key={domain.title}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              onMouseEnter={() => soundManager.playHover()}
-              className="glass-card rounded-2xl p-6 sm:p-8 border-t border-red-500/40 border-b border-black/80 hover:border-red-400/80 shadow-xl amaterasu-hover space-y-6 transition-all"
+              className="glass-card rounded-2xl p-6 sm:p-8 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 shadow-xl amaterasu-hover space-y-6 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 shadow-[0_0_12px_rgba(220,38,38,0.3)]">
+                  <div className="p-3 rounded-xl bg-orange-950/60 border border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.3)]">
                     {domain.icon}
                   </div>
                   <div>
                     <h3 className="font-mono font-bold text-lg sm:text-xl text-white">
                       {domain.title}
                     </h3>
-                    <span className="text-xs font-mono text-red-400 tracking-wider">
+                    <span className="text-xs font-mono text-orange-400 tracking-wider">
                       // {domain.level}
                     </span>
                   </div>
@@ -92,14 +92,14 @@ export const ExpertiseSection: React.FC = () => {
                   {domain.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono text-slate-200 bg-black/60 border border-red-900/30 hover:border-red-500/50 transition-colors"
+                      className="px-2.5 py-1 rounded-lg text-xs font-mono text-slate-200 bg-black/60 border border-orange-900/30 hover:border-orange-500/50 transition-colors"
                     >
                       {skill}
                     </span>
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

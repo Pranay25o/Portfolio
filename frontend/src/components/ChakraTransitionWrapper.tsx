@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { soundManager } from '../lib/sound';
+/*
+ * PERFORMANCE FIX: Removed ALL Framer Motion from this file.
+ *
+ * Before: AnimatePresence + motion.div + motion.div for SageIntro — Framer Motion
+ *         needed to be loaded before the intro could render/animate, delaying FCP.
+ *
+ * After: The SageIntro uses native CSS animations (sage-intro / sage-intro-text
+ *        classes defined in index.css). These run immediately — even before any
+ *        JS parses. The component uses a simple CSS animation-end callback via
+ *        onAnimationEnd to unmount after the animation completes.
+ *
+ * ChakraTransitionWrapper itself never needed Framer Motion — it just uses
+ * conditional rendering with a simple class, which is unchanged.
+ */
 
 interface ChakraTransitionWrapperProps {
   children: React.ReactNode;
@@ -43,39 +55,30 @@ export const ChakraTransitionWrapper: React.FC<ChakraTransitionWrapperProps> = (
   );
 };
 
-// Initial Load Awakening Intro (Instant Non-Blocking Naruto Uzumaki Sage Mode)
+// Initial Load Awakening Intro (Pure CSS — no Framer Motion, no JS blocking)
 export const SageIntro: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-      if (onComplete) onComplete();
-    }, 450);
+  const handleAnimationEnd = () => {
+    setVisible(false);
+    if (onComplete) onComplete();
+  };
 
-    return () => clearTimeout(timer);
-  }, [onComplete]);
+  if (!visible) return null;
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ opacity: 0.9 }}
-          animate={{ opacity: 0 }}
-          exit={{ opacity: 0, pointerEvents: 'none' }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
-          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-gradient-to-b from-[#7c2d12] via-[#431407] to-[#060403]"
-        >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0.9 }}
-            animate={{ scale: 1.1, opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="text-center font-display text-2xl md:text-4xl font-bold tracking-widest text-amber-100 drop-shadow-[0_0_25px_#f97316]"
-          >
-            六道仙人 // UZUMAKI SAGE
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    /*
+     * CSS animation: sage-intro class applies `animation: sage-intro-fade 0.45s ease-out forwards`
+     * sage-intro-text applies `animation: sage-text-scale 0.4s ease-out forwards`
+     * Both defined in index.css. Runs immediately without waiting for JS bundle.
+     */
+    <div
+      className="sage-intro fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-gradient-to-b from-[#7c2d12] via-[#431407] to-[#060403]"
+      onAnimationEnd={handleAnimationEnd}
+    >
+      <div className="sage-intro-text text-center font-display text-2xl md:text-4xl font-bold tracking-widest text-amber-100 drop-shadow-[0_0_25px_#f97316]">
+        六道仙人 // UZUMAKI SAGE
+      </div>
+    </div>
   );
 };

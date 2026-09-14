@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+// PERFORMANCE FIX: Removed framer-motion import. The success state animation
+// is now a pure CSS @keyframes animation (contact-success-reveal class).
 import { Mail, Send, Copy, Check, Sparkles, Terminal, Phone, MapPin, CheckCircle2 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './Icons';
 
@@ -230,11 +231,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               {submitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="p-8 text-center space-y-5 rounded-xl bg-orange-950/40 border border-orange-500/50"
-                >
+                <div className="contact-success-reveal p-8 text-center space-y-5 rounded-xl bg-orange-950/40 border border-orange-500/50">
                   <div className="w-14 h-14 mx-auto rounded-full bg-orange-600/20 border border-orange-500 flex items-center justify-center shadow-[0_0_25px_rgba(249,115,22,0.7)]">
                     <CheckCircle2 className="w-7 h-7 text-orange-400" />
                   </div>
@@ -263,7 +260,7 @@ export const ContactSection: React.FC = () => {
                       SEND ANOTHER MESSAGE
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

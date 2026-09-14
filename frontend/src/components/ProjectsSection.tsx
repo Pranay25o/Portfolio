@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { soundManager } from '../lib/sound';
-import { ExternalLink, Sparkles, X, CheckCircle2, ShieldCheck, Flame, Radio, Bot, ShoppingCart, Activity, BarChart3, ArrowRight } from 'lucide-react';
+// soundManager removed — all methods are no-ops; no reason to import/call them
+import { ExternalLink, Sparkles, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { GithubIcon } from './Icons';
 
 interface Project {
@@ -159,10 +159,7 @@ export const ProjectsSection: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => {
-                  soundManager.playHover();
-                  setActiveFilter(tab.key as any);
-                }}
+                onClick={() => setActiveFilter(tab.key as 'all' | 'fullstack' | 'ai' | 'analytics')}
                 className={`px-3.5 py-1.5 rounded-xl font-mono text-xs tracking-wider transition-all ${
                   activeFilter === tab.key
                     ? 'bg-red-900/80 text-white border border-red-500/60 shadow-[0_0_15px_rgba(220,38,38,0.5)]'
@@ -175,20 +172,13 @@ export const ProjectsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Bento Grid */}
+        {/* Bento Grid (Instant rendering, 0ms delay) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((project, idx) => (
-            <motion.div
+          {filtered.map((project) => (
+            <div
               key={project.id}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              onMouseEnter={() => soundManager.playHover()}
-              className="group relative flex flex-col justify-between glass-card rounded-2xl p-6 border-t border-red-500/40 border-b border-black/80 hover:border-red-400/80 amaterasu-hover cursor-pointer transition-all overflow-hidden"
+              className="group relative flex flex-col justify-between glass-card rounded-2xl p-6 border-t border-orange-500/40 border-b border-black/80 hover:border-orange-400/80 amaterasu-hover cursor-pointer transition-all overflow-hidden"
               onClick={() => {
-                soundManager.playSlash();
                 setSelectedProject(project);
               }}
             >
@@ -240,7 +230,7 @@ export const ProjectsSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
